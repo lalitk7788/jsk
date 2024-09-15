@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Tracker</title>
+    <script>
+        function sendLocationToServer(latitude, longitude) {
+            // Replace with your server's URL
+            const serverUrl = 'https://your-server.com/track-location';
+            
+            // Send location data to server
+            fetch(serverUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    latitude: latitude,
+                    longitude: longitude,
+                    timestamp: new Date(),
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("status").innerText = "Location sent successfully!";
+            })
+            .catch((error) => {
+                document.getElementById("status").innerText = "Error sending location!";
+                console.error('Error:', error);
+            });
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    // Display location for user reference (optional)
+                    document.getElementById("location").innerText = 
+                        `Latitude: ${lat}, Longitude: ${lon}`;
+                    
+                    // Send location to the server
+                    sendLocationToServer(lat, lon);
+                }, showError);
+            } else {
+                document.getElementById("status").innerText = "Geolocation is not supported by this browser.";
+            }
+        }
+
+        function showError(error) {
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    document.getElementById("status").innerText = "User denied the request for Geolocation.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    document.getElementById("status").innerText = "Location information is unavailable.";
+                    break;
+                case error.TIMEOUT:
+                    document.getElementById("status").innerText = "The request to get user location timed out.";
+                    break;
+                default:
+                    document.getElementById("status").innerText = "An unknown error occurred.";
+                    break;
+            }
+        }
+    </script>
+</head>
+<body onload="getLocation()">
+    <h1>Tracking Your Location...</h1>
+    <p id="status">Please wait while we retrieve your location.</p>
+    <p id="location"></p>
+</body>
+</html>
